@@ -1,0 +1,636 @@
+/* ───────────────────────── Layout ───────────────────────── */
+
+.ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: clamp(28px, 6vh, 64px) clamp(28px, 7vw, 120px) 28px;
+  pointer-events: none;
+}
+
+.ui > * {
+  pointer-events: auto;
+}
+
+.column {
+  align-self: center;
+  width: min(460px, 100%);
+  animation: rise-in 0.7s var(--ease) both;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  font-family: var(--font-type);
+  font-size: 12px;
+  color: var(--cream-faint);
+  letter-spacing: 0.06em;
+}
+
+/* ───────────────────────── Title block ───────────────────────── */
+
+.overline {
+  font-family: var(--font-type);
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--red-bright);
+  margin: 0 0 14px;
+  opacity: 0.85;
+}
+
+.title {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: clamp(44px, 6.4vw, 84px);
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: var(--cream);
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.8), 0 0 2px rgba(214, 205, 184, 0.3);
+  animation: flicker 7s infinite;
+}
+
+.title .five {
+  display: block;
+  color: var(--cream);
+  position: relative;
+}
+
+.title .five::after {
+  /* a thin red strike, like a name crossed off a list */
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: 30%;
+  top: 54%;
+  height: 2px;
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+  transform: rotate(-2deg);
+  opacity: 0.8;
+}
+
+.tagline {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--cream-dim);
+  margin: 18px 0 0;
+  max-width: 34ch;
+}
+
+/* ───────────────────────── Menu list ───────────────────────── */
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: clamp(28px, 6vh, 56px) 0 0;
+  display: grid;
+  gap: 4px;
+}
+
+.menu-item {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 0 10px 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  transition: color 0.25s var(--ease), padding 0.35s var(--ease), letter-spacing 0.35s var(--ease);
+}
+
+.menu-item .num {
+  font-family: var(--font-type);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--cream-faint);
+  min-width: 2ch;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 1px;
+  background: var(--cream-faint);
+  transform-origin: left;
+  transform: scaleX(0.5);
+  transition: transform 0.35s var(--ease), background 0.25s;
+}
+
+.menu-item:hover:not(:disabled),
+.menu-item:focus-visible {
+  color: var(--cream);
+  padding-left: 34px;
+  letter-spacing: 0.36em;
+  outline: none;
+}
+
+.menu-item:hover:not(:disabled)::before,
+.menu-item:focus-visible::before {
+  background: var(--red-bright);
+  transform: scaleX(1.6);
+  box-shadow: 0 0 10px var(--red-glow);
+}
+
+.menu-item:disabled {
+  cursor: not-allowed;
+  color: var(--cream-faint);
+}
+
+.menu-item .hint {
+  margin-left: auto;
+  font-family: var(--font-type);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  color: var(--cream-faint);
+}
+
+/* ───────────────────────── Panels & forms ───────────────────────── */
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.back {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--cream-dim);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.back:hover {
+  border-color: var(--red);
+  color: var(--cream);
+}
+
+.panel-title {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 34px;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.panel-sub {
+  font-family: var(--font-type);
+  color: var(--cream-faint);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 2px 0 0;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.field-label {
+  font-family: var(--font-type);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+
+.input {
+  width: 100%;
+  background: rgba(10, 10, 11, 0.6);
+  border: none;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--cream);
+  font-family: var(--font-type);
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  padding: 10px 2px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.input::placeholder {
+  color: var(--cream-faint);
+}
+
+.input:focus {
+  border-bottom-color: var(--red-bright);
+  background: rgba(20, 10, 10, 0.5);
+}
+
+.code-input {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border-bottom: 1px solid var(--line-strong);
+  transition: border-color 0.2s;
+}
+
+.code-input:focus-within {
+  border-bottom-color: var(--red-bright);
+}
+
+.code-prefix {
+  font-family: var(--font-type);
+  font-size: 30px;
+  color: var(--cream-faint);
+  letter-spacing: 0.1em;
+}
+
+.code-input .input {
+  border: none;
+  background: none;
+  font-size: 30px;
+  letter-spacing: 0.4em;
+  padding-left: 0;
+}
+
+.field-help {
+  font-size: 12px;
+  color: var(--cream-faint);
+}
+
+.error {
+  font-family: var(--font-type);
+  font-size: 13px;
+  color: var(--red-bright);
+  margin: -6px 0 18px;
+  animation: rise-in 0.3s var(--ease) both;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.btn {
+  position: relative;
+  border: 1px solid var(--line-strong);
+  background: rgba(12, 12, 13, 0.6);
+  color: var(--cream);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 14px 22px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--cream-dim);
+  background: rgba(30, 30, 32, 0.7);
+}
+
+.btn-primary {
+  border-color: var(--red);
+  background: linear-gradient(180deg, rgba(120, 22, 22, 0.55), rgba(70, 12, 12, 0.6));
+}
+
+.btn-primary:hover:not(:disabled) {
+  border-color: var(--red-bright);
+  background: linear-gradient(180deg, rgba(150, 30, 28, 0.7), rgba(90, 16, 16, 0.75));
+  box-shadow: 0 0 22px var(--red-glow);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-small {
+  padding: 8px 12px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+/* ───────────────────────── Settings ───────────────────────── */
+
+.settings {
+  max-height: min(64vh, 620px);
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding-bottom: 32px;
+  /* fade the bottom edge so it's obvious the list scrolls */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+}
+
+.settings-group {
+  margin-bottom: 26px;
+}
+
+.settings-group h3 {
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--red-bright);
+  margin: 0 0 6px;
+  opacity: 0.85;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 180px 44px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.row-label {
+  font-size: 14px;
+  color: var(--cream);
+}
+
+.row-label small {
+  display: block;
+  font-size: 11px;
+  color: var(--cream-faint);
+}
+
+.row-value {
+  font-family: var(--font-type);
+  font-size: 12px;
+  color: var(--cream-dim);
+  text-align: right;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--line-strong);
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--red);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--line-strong);
+}
+
+.segmented button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  cursor: pointer;
+}
+
+.segmented button[aria-checked='true'] {
+  background: rgba(165, 34, 34, 0.35);
+  color: var(--cream);
+}
+
+.switch {
+  width: 40px;
+  height: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line-strong);
+  background: rgba(10, 10, 11, 0.6);
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cream-dim);
+  transition: transform 0.2s var(--ease), background 0.2s;
+}
+
+.switch[aria-checked='true'] {
+  border-color: var(--red);
+}
+
+.switch[aria-checked='true']::after {
+  transform: translateX(20px);
+  background: var(--cream);
+}
+
+/* ───────────────────────── Lobby ───────────────────────── */
+
+.room-code {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.room-code strong {
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: 44px;
+  letter-spacing: 0.18em;
+  color: var(--cream);
+}
+
+.slots {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 24px;
+  border-top: 1px solid var(--line);
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  animation: rise-in 0.4s var(--ease) both;
+}
+
+.slot-index {
+  font-family: var(--font-type);
+  font-size: 12px;
+  color: var(--cream-faint);
+}
+
+.slot-name {
+  font-size: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.slot-name .tag {
+  font-family: var(--font-type);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red-bright);
+}
+
+.slot-name .tag.you {
+  color: var(--cream-dim);
+}
+
+.slot.empty .slot-name {
+  color: var(--cream-faint);
+  font-family: var(--font-type);
+  font-size: 13px;
+}
+
+.slot-status {
+  font-family: var(--font-type);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream-faint);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cream-faint);
+  display: inline-block;
+}
+
+.dot.idle {
+  background: var(--cream-faint);
+}
+
+.dot.ok {
+  background: var(--ok);
+  box-shadow: 0 0 8px rgba(127, 151, 116, 0.6);
+}
+
+.dot.warn {
+  background: var(--warn);
+  animation: flicker 1.4s infinite;
+}
+
+.dot.bad {
+  background: var(--red-bright);
+}
+
+.note {
+  font-family: var(--font-type);
+  font-size: 12px;
+  color: var(--cream-faint);
+  margin-top: 16px;
+}
+
+/* ───────────────────────── Connection badge & notices ───────────────────────── */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notice {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  max-width: 360px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border-left: 2px solid var(--cream-dim);
+  font-size: 13px;
+  animation: rise-in 0.4s var(--ease) both;
+  backdrop-filter: blur(6px);
+}
+
+.notice.error {
+  border-left-color: var(--red-bright);
+}
+
+.audio-hint {
+  font-family: var(--font-type);
+  font-size: 11px;
+  color: var(--cream-faint);
+  letter-spacing: 0.08em;
+}
+
+/* ───────────────────────── Exit ───────────────────────── */
+
+.farewell {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--cream-dim);
+  max-width: 30ch;
+}
+
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr 120px 38px;
+  }
+  .shade {
+    background: rgba(6, 6, 7, 0.7);
+  }
+}
+
+.screen {
+  align-self: center;
+  min-width: 0;
+}
