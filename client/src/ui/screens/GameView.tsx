@@ -212,8 +212,13 @@ export function GameView({ onQuit }: { onQuit: () => void }) {
   }, [broadcast.key, broadcast.doc]);
 
   async function handleInteract(target: InteractTarget, phase: 'press' | 'release') {
-    if (target.kind === 'player') {
-      await interact(target.id, { type: phase === 'press' ? 'revive' : 'reviveCancel' });
+    if (target.kind === 'player' || target.kind === 'child') {
+      await interact(
+        target.id,
+        target.kind === 'child'
+          ? { type: phase === 'press' ? 'rescue' : 'rescueCancel' }
+          : { type: phase === 'press' ? 'revive' : 'reviveCancel' },
+      );
       return;
     }
     if (phase !== 'press') return;

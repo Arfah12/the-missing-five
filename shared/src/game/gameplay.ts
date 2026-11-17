@@ -289,6 +289,8 @@ export interface WorldSnapshot {
   levers: { a: boolean; b: boolean };
   /** Journal entries in the order they were found (shared by the team). */
   journal: { doc: string; by: string }[];
+  /** Children whose ropes were opened and whose parents have been called. */
+  rescued: string[];
   objectives: ObjectiveState[];
   /** Story decisions made by the team (shared). */
   decisions: Decision[];
@@ -314,6 +316,8 @@ export type InteractAction =
   | { type: 'tune'; freq: number }
   | { type: 'revive' }
   | { type: 'reviveCancel' }
+  | { type: 'rescue' }
+  | { type: 'rescueCancel' }
   | { type: 'choose'; option: ChoiceOption };
 
 export type InteractResult =
@@ -332,6 +336,8 @@ export function parseAction(raw: unknown): InteractAction | null {
     case 'use':
     case 'revive':
     case 'reviveCancel':
+    case 'rescue':
+    case 'rescueCancel':
       return { type: r.type };
     case 'toggle':
       return { type: 'toggle', index: typeof r.index === 'number' && Number.isInteger(r.index) && r.index >= 0 && r.index < 4 ? r.index : undefined };

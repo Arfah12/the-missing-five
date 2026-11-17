@@ -27,6 +27,7 @@ import { audio } from '../audio/AudioManager';
 import { QUALITY, type QualityPreset } from '../engine/quality';
 import type { Quality } from '../lib/settings';
 import { Flashlight } from './Flashlight';
+import { FriendsView } from './FriendsView';
 import { Input } from './Input';
 import { ItemsView } from './ItemsView';
 import { RemotePlayers } from './RemotePlayers';
@@ -72,7 +73,7 @@ export interface HudState {
 export interface InteractTarget {
   /** Item id, interactable id or player id. */
   id: string;
-  kind: 'item' | 'door' | 'padlock' | 'pry' | 'fusebox' | 'radio' | 'lever' | 'readable' | 'altar' | 'car' | 'player';
+  kind: 'item' | 'child' | 'door' | 'padlock' | 'pry' | 'fusebox' | 'radio' | 'lever' | 'readable' | 'altar' | 'car' | 'player';
   verb: string;
   name: string;
 }
@@ -165,6 +166,7 @@ export class Game {
   private seq = 0;
   private lastSent = '';
   private items!: ItemsView;
+  private friends!: FriendsView;
   private worldState: WorldSnapshot | null = null;
   private me: PrivateState | null = null;
   private uiOpen = false;
@@ -228,6 +230,7 @@ export class Game {
     this.remotes = new RemotePlayers(this.scene, this.net.selfId);
     this.watcherView = new WatcherView(this.scene);
     this.items = new ItemsView(this.scene);
+    this.friends = new FriendsView(this.scene);
     if (this.net.world) this.applyWorld(this.net.world);
     if (this.net.me) this.me = this.net.me;
     this.unsubs.push(
@@ -402,6 +405,7 @@ export class Game {
 
     this.remotes.update(dt, this.camera);
     this.watcherView.update(dt, this.camera);
+    this.friends.update(this.time, this.camera);
     audio.setListener(this.camera.position.x, this.camera.position.y, this.camera.position.z, this.yaw);
     this.updateScares(dt);
     audio.setMusic(this.watcherView.mode === 'chase' ? 'chase' : this.fear > 0.5 || this.watcherView.mode !== 'hidden' ? 'tense' : 'calm');
@@ -524,6 +528,7 @@ export class Game {
   private applyWorld(w: WorldSnapshot): void {
     this.worldState = w;
     this.items?.sync(w.items);
+    this.friends?.sync(w);
     for (const id of LOCKED_AT_START) {
       const open = w.open.includes(id);
       this.world?.setOpen(id, open);
@@ -588,7 +593,7 @@ export class Game {
     const pressed = this.input.consume('interact');
     const held = this.input.isHeld('interact');
     if (this.holding) {
-      // reviving: keep holding E while looking at them
+      // Helping a child or reviving a teammate: keep holding E.
       if (!held || this.target?.id !== this.holding.id) {
         this.cb.onInteract(this.holding, 'release');
         this.holding = null;
@@ -600,7 +605,7 @@ export class Game {
     }
     if (!pressed || !this.target || this.me?.downed) return;
     this.cb.onInteract(this.target, 'press');
-    if (this.target.kind === 'player') {
+    if (this.target.kind === 'player' || this.target.kind === 'child') {
       this.holding = this.target;
       this.holdTime = 0;
     }
@@ -632,6 +637,9 @@ export class Game {
       for (const it of w.items) {
         const doc = it.doc ? DOCS[it.doc] : undefined;
         consider({ id: it.id, kind: 'item', verb: doc ? 'Pick up' : 'Take', name: it.name }, it.x, it.y + 0.05, it.z);
+      }
+      for (const child of this.friends.targets()) {
+        consider({ id: child.id, kind: 'child', verb: 'Hold E to buka tali & baca doa', name: child.name }, child.x, child.y, child.z, 3.2);
       }
       for (const it of INTERACTABLES) {
         const open = w.open.includes(it.opens ?? it.id);
@@ -775,7 +783,7 @@ export class Game {
       downed: this.me?.downed ?? false,
       bleedout: this.me?.bleedout ?? 0,
       fear: this.fear,
-      revive: this.holding?.kind === 'player' ? Math.min(1, this.holdTime / 3) : 0,
+      revive: this.holding && (this.holding.kind === 'player' || this.holding.kind === 'child') ? Math.min(1, this.holdTime / (this.holding.kind === 'child' ? 5 : 3)) : 0,
       debug: this.debug
         ? { fps: this.fps, x: s.x, y: s.y, z: s.z, surface: s.surface, calls: Number(info.calls) || 0, tris: Number(info.triangles) || 0, watcher: this.watcherView.mode }
         : undefined,
@@ -805,6 +813,7 @@ export class Game {
     this.unsubs.forEach((u) => u());
     this.unsubs = [];
     this.remotes?.dispose();
+    this.friends?.dispose();
     this.resizeObserver?.disconnect();
     this.input?.detach();
     this.weather?.dispose();

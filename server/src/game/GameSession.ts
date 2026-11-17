@@ -116,6 +116,8 @@ export class GameSession {
   // ── shared world state ──
   private readonly items = new Map<string, WorldItem>();
   private readonly journal: { doc: string; by: string }[] = [];
+  private readonly rescued = new Set<string>();
+  private readonly rescuing = new Map<string, { by: string; since: number }>();
   private readonly unlocked = new Set<string>();
   private power = false;
   private radioSolved = false;
@@ -320,6 +322,23 @@ export class GameSession {
     this.emit({ type: 'found', doc, by });
   }
 
+  private rescueAction(p: ServerPlayer, child: string, action: InteractAction): Outcome<InteractResult> {
+    if (!['alya', 'danish', 'mira', 'adam', 'sofia'].includes(child)) return no('TOO_FAR');
+    const item = this.items.get(`belonging-${child}`);
+    const position = item ?? ITEM_SPAWNS.find((q) => q.id === `belonging-${child}`);
+    if (!position || !this.near(p, position.x + 0.9, position.y, position.z + 0.8, 3.2)) return no('TOO_FAR');
+    if (this.rescued.has(child)) return no('SERVER_ERROR', `${child[0].toUpperCase()}${child.slice(1)} has already gone home.`);
+    if (action.type === 'rescueCancel') {
+      if (this.rescuing.get(child)?.by === p.id) this.rescuing.delete(child);
+      return okv({ kind: 'ok' });
+    }
+    if (action.type !== 'rescue') return no('SERVER_ERROR');
+    const current = this.rescuing.get(child);
+    if (!current) this.rescuing.set(child, { by: p.id, since: this.now() });
+    else if (current.by !== p.id) return no('SERVER_ERROR', 'Someone else is helping this child.');
+    return okv({ kind: 'ok', message: 'Hold E and recite the doa to open the rope.' });
+  }
+
   private hasItem(p: ServerPlayer, need: string): boolean {
     return p.inventory.some((it) => it && (it.id === need || it.type === need));
   }
@@ -337,6 +356,8 @@ export class GameSession {
     // revive a teammate
     const other = this.players.get(targetId);
     if (other && other.id !== id) return this.reviveAction(p, other, action);
+
+    if (targetId.startsWith('child:')) return this.rescueAction(p, targetId.slice(6), action);
 
     // pick up an item
     const item = this.items.get(targetId);
@@ -681,6 +702,21 @@ export class GameSession {
         if (c) this.emit({ type: 'message', text: `${p.name} woke up by the car, not knowing how they got there.` });
         this.pendingCorrections.push({ id: p.id, c: c! });
       }
+      for (const [child, rescue] of this.rescuing) {
+        const helper = this.players.get(rescue.by);
+        const item = ITEM_SPAWNS.find((q) => q.id === `belonging-${child}`);
+        if (!helper || !helper.connected || helper.downed || !item || Math.hypot(helper.x - (item.x + 0.9), helper.z - (item.z + 0.8)) > 3.2) {
+          this.rescuing.delete(child);
+        } else if (t - rescue.since >= 5000) {
+          this.rescuing.delete(child);
+          this.rescued.add(child);
+          this.items.delete(`belonging-${child}`);
+          this.addToJournal(`belonging-${child}`, helper.name);
+          this.emit({ type: 'message', text: `${child[0].toUpperCase()}${child.slice(1)} dijumpai! Ibu bapa telah dihubungi dan datang mengambilnya.` });
+          this.emit({ type: 'sfx', sound: 'vanish', x: item.x, y: item.y, z: item.z });
+          this.worldDirty = true;
+        }
+      }
     }
     const before = this.leverState();
     if (this.levers.a && this.levers.a <= t) this.levers.a = 0;
@@ -791,6 +827,7 @@ export class GameSession {
       fuse: [...this.fuse],
       levers: this.leverState(),
       journal: [...this.journal],
+      rescued: [...this.rescued],
       objectives: computeObjectives({ found, power: this.power, secretRoom: this.secretRoom, final: this.final?.mode ?? null }),
       decisions: [...this.decisions],
       final: this.final ? { ...this.final } : null,
