@@ -2,13 +2,13 @@ import * as THREE from 'three';
 
 /**
  * Hand-held torch: a soft spotlight attached to the camera that lags a
- * little behind your view, drains its battery while on and starts to
- * flicker when the battery is weak.
+ * little behind your view. The battery is intentionally unlimited so players
+ * can focus on finding the children instead of searching for pickups.
  */
 
 export const FLASHLIGHT = {
-  /** Full battery lasts about 6 minutes of continuous use. */
-  drainPerSecond: 1 / 360,
+  /** Battery does not drain during exploration. */
+  drainPerSecond: 0,
   lowLevel: 0.15,
   intensity: 38,
   distance: 26,
