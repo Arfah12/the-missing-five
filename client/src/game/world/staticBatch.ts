@@ -35,7 +35,9 @@ export function batchStatic(root: THREE.Object3D, cellSize = 28): { before: numb
 
     const geo = src.index ? src.toNonIndexed() : src.clone();
     for (const name of Object.keys(geo.attributes)) if (name !== 'position' && name !== 'normal' && name !== 'uv') geo.deleteAttribute(name);
-    for (const k of Object.keys(geo.morphAttributes)) delete geo.morphAttributes[k];
+    for (const k of Object.keys(geo.morphAttributes) as Array<keyof typeof geo.morphAttributes>) {
+      delete geo.morphAttributes[k];
+    }
     geo.clearGroups();
     geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverseRoot, mesh.matrixWorld));
 
